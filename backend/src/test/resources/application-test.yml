@@ -1,0 +1,8 @@
+app:
+  supabase:
+    url: https://test-project.supabase.co
+    audience: authenticated
+    jwt-secret: ""
+    require-verified-email: true
+  cors:
+    allowed-origin: http://localhost:5173

@@ -1,0 +1,103 @@
+@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource-variable/public-sans';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design tokens. Every color in the app resolves to one of these. Space-separated RGB so Tailwind alpha works. */
+:root,
+[data-theme='light'] {
+  --bg: 246 247 244;
+  --surface: 255 255 255;
+  --sunken: 238 241 236;
+  --line: 218 225 217;
+  --ink: 20 32 27;
+  --muted: 88 104 96;
+  --primary: 25 99 79;
+  --primary-ink: 255 255 255;
+  --primary-soft: 224 238 232;
+  --accent: 201 138 18;
+  --danger: 184 44 44;
+  --s-todo: 88 104 96;
+  --s-progress: 36 92 200;
+  --s-review: 112 72 205;
+  --s-blocked: 184 44 44;
+  --s-done: 28 120 72;
+  --p-low: 88 104 96;
+  --p-medium: 36 92 200;
+  --p-high: 146 86 0;
+  --p-urgent: 184 44 44;
+  --shadow: 20 32 27;
+  --nav: 240 243 238;
+  --raised: 255 255 255;
+  --highlight: 25 99 79;
+  color-scheme: light;
+}
+[data-theme='dark'] {
+  --bg: 13 20 17;
+  --surface: 20 30 26;
+  --sunken: 27 40 34;
+  --line: 42 58 51;
+  --ink: 230 238 233;
+  --muted: 148 166 156;
+  --primary: 70 189 150;
+  --primary-ink: 8 22 17;
+  --primary-soft: 24 54 44;
+  --accent: 236 172 52;
+  --danger: 240 112 112;
+  --s-todo: 148 166 156;
+  --s-progress: 108 160 255;
+  --s-review: 170 142 255;
+  --s-blocked: 240 112 112;
+  --s-done: 90 200 140;
+  --p-low: 148 166 156;
+  --p-medium: 108 160 255;
+  --p-high: 236 172 52;
+  --p-urgent: 240 112 112;
+  --shadow: 0 0 0;
+  --nav: 10 16 13;
+  --raised: 32 46 39;
+  --highlight: 70 189 150;
+  color-scheme: dark;
+}
+
+/* Layout, elevation, motion and stacking tokens shared by both themes. */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 360ms;
+  --elev-1: 0 1px 0 rgb(var(--shadow) / 0.05), 0 1px 2px rgb(var(--shadow) / 0.06);
+  --elev-2: 0 2px 6px rgb(var(--shadow) / 0.08), 0 8px 20px -8px rgb(var(--shadow) / 0.16);
+  --elev-3: 0 16px 40px -12px rgb(var(--shadow) / 0.35);
+  --sidebar-w: 256px;
+  --sidebar-w-collapsed: 72px;
+}
+
+/* Smooth theme switch: only while the class is present, so normal interaction stays snappy. */
+html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *::after {
+  transition: background-color 260ms var(--ease-out), border-color 260ms var(--ease-out), color 260ms var(--ease-out), fill 260ms var(--ease-out), stroke 260ms var(--ease-out) !important;
+}
+
+@layer base {
+  html { @apply bg-bg text-ink font-sans antialiased; }
+  body { @apply min-h-screen; }
+  h1, h2, h3, h4 { @apply font-display tracking-tight; }
+  :focus-visible { outline: 2px solid rgb(var(--primary)); outline-offset: 2px; border-radius: 4px; }
+  ::selection { background: rgb(var(--primary) / 0.25); }
+}
+
+@layer components {
+  .input {
+    @apply w-full rounded border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-muted/70
+      transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 disabled:opacity-60;
+  }
+  .card { @apply rounded-lg border border-line bg-surface shadow-raise; }
+  .card-hover { @apply transition-[border-color,box-shadow,transform] duration-200 hover:border-primary/50 hover:shadow-pop; }
+  .eyebrow { @apply text-[11px] font-semibold uppercase tracking-[0.08em] text-muted; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}

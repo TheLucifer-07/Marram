@@ -1,0 +1,63 @@
+server:
+  port: ${PORT:8080}
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+  shutdown: graceful
+
+spring:
+  application:
+    name: marram
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/marram?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${DB_USERNAME:marram}
+    password: ${DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: none            # schema is owned by Flyway, never by Hibernate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+          batch_size: 50
+        default_batch_fetch_size: 32
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jackson:
+    default-property-inclusion: always
+    serialization:
+      write-dates-as-timestamps: false
+
+app:
+  supabase:
+    # https://<project-ref>.supabase.co  (no trailing slash). Issuer and JWKS URL are derived from it.
+    url: ${SUPABASE_URL:}
+    audience: ${SUPABASE_JWT_AUDIENCE:authenticated}
+    # Optional. Only for projects still on the legacy HS256 shared secret. Leave empty for asymmetric keys.
+    jwt-secret: ${SUPABASE_JWT_SECRET:}
+    # Profiles are only created for emails Supabase has verified. Turn on "Confirm email" in Supabase Auth.
+    # Otherwise anyone could register someone else's address and be added to workspaces by email.
+    require-verified-email: ${SUPABASE_REQUIRE_VERIFIED_EMAIL:true}
+  cors:
+    allowed-origin: ${FRONTEND_ORIGIN:http://localhost:5173}
+  time-zone: ${APP_TIME_ZONE:UTC}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+  default-produces-media-type: application/json
