@@ -58,9 +58,34 @@ class ProductionDatabaseConfigurationValidatorTest {
     }
 
     @Test
+    void productionRejectsMysqlSystemDatabases() {
+        MockEnvironment environment = productionEnvironment()
+                .withProperty("DB_URL", "jdbc:mysql://db.example:4000/sys?sslMode=VERIFY_IDENTITY")
+                .withProperty("DB_USERNAME", "marram")
+                .withProperty("DB_PASSWORD", "local-test-password");
+
+        assertThatThrownBy(() -> ProductionDatabaseConfigurationValidator.validate(environment))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("'sys' is a MySQL/TiDB system database")
+                .hasMessageContaining("do not baseline a system database");
+    }
+
+    @Test
+    void productionRequiresDatabaseNameInJdbcUrl() {
+        MockEnvironment environment = productionEnvironment()
+                .withProperty("DB_URL", "jdbc:mysql://db.example:4000?sslMode=VERIFY_IDENTITY")
+                .withProperty("DB_USERNAME", "marram")
+                .withProperty("DB_PASSWORD", "local-test-password");
+
+        assertThatThrownBy(() -> ProductionDatabaseConfigurationValidator.validate(environment))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("include a dedicated application database");
+    }
+
+    @Test
     void productionAcceptsMysqlJdbcConfiguration() {
         MockEnvironment environment = productionEnvironment()
-                .withProperty("DB_URL", "jdbc:mysql://db.example:3306/marram")
+                .withProperty("DB_URL", "jdbc:mysql://db.example:3306/marram?sslMode=VERIFY_IDENTITY")
                 .withProperty("DB_USERNAME", "marram")
                 .withProperty("DB_PASSWORD", "local-test-password");
 

@@ -125,4 +125,4 @@ CREATE INDEX idx_comments_task_created ON comments (task_id, created_at);
 -- ===== V6__add_due_date_null_sort_rank.sql =====
 ALTER TABLE tasks
     ADD COLUMN due_date_null_rank INT
-        GENERATED ALWAYS AS (CASE WHEN due_date IS NULL THEN 1 ELSE 0 END) STORED;
+        GENERATED ALWAYS AS (CASE WHEN due_date IS NULL THEN 1 ELSE 0 END) VIRTUAL;
