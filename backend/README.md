@@ -12,6 +12,10 @@ export FRONTEND_ORIGIN=http://localhost:5173
 ./mvnw spring-boot:run
 ```
 
+## Render deployment
+
+Set `SPRING_PROFILES_ACTIVE=production` in the Render web service environment. Configure `DB_URL` as a MySQL JDBC URL beginning with `jdbc:mysql://` (for example, `jdbc:mysql://<host>:3306/<database>?sslMode=REQUIRED`), plus `DB_USERNAME` and `DB_PASSWORD` from the hosted MySQL provider. Render-style `mysql://` URLs are not JDBC URLs and must be converted to the JDBC form. Production profile startup rejects missing or malformed database settings before datasource initialization and does not fall back to localhost. Keep `SUPABASE_URL`, `SUPABASE_JWT_AUDIENCE`, `SUPABASE_JWT_SECRET` (only for legacy HS256 projects), and `SUPABASE_REQUIRE_VERIFIED_EMAIL` configured as needed; JWT verification remains enabled. The server binds to `0.0.0.0` and uses Render's `PORT` when supplied.
+
 Swagger UI: `http://localhost:8080/swagger-ui.html`. Health: `/actuator/health`. Flyway creates the schema on first start. See `.env.example` for every setting.
 
 ## Architecture

@@ -12,8 +12,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf 
  && useradd --system --uid 10001 marram
 WORKDIR /app
 COPY --from=build /build/app.jar app.jar
+COPY docker-healthcheck.sh /usr/local/bin/docker-healthcheck
+RUN chmod 755 /usr/local/bin/docker-healthcheck
 USER marram
 EXPOSE 8080
 ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75"
-HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=5 CMD curl -fsS http://localhost:8080/actuator/health/readiness || exit 1
+HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=5 CMD ["/usr/local/bin/docker-healthcheck"]
 ENTRYPOINT ["java", "-jar", "app.jar"]
