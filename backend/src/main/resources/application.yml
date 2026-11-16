@@ -7,6 +7,8 @@ server:
   shutdown: graceful
 
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: marram
   datasource:

@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpecificationExecutor<Project> {
 
@@ -25,5 +27,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
     long countByWorkspaceIdAndStatus(Long workspaceId, ProjectStatus status);
 
     @EntityGraph(attributePaths = {"createdBy"})
-    List<Project> findByWorkspaceIdAndStatus(Long workspaceId, ProjectStatus status, Pageable pageable);
+    @Query("select p from Project p where p.workspace.id = :workspaceId and p.status = :status "
+            + "order by case when p.dueDate is null then 1 else 0 end, p.dueDate asc, p.id desc")
+    List<Project> findByWorkspaceIdAndStatus(@Param("workspaceId") Long workspaceId,
+                                             @Param("status") ProjectStatus status, Pageable pageable);
 }

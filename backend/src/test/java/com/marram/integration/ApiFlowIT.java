@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.marram.entity.Task;
 import com.marram.service.TaskHistoryService;
 import com.jayway.jsonpath.JsonPath;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.util.AopTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.testcontainers.containers.MySQLContainer;
@@ -176,9 +178,10 @@ class ApiFlowIT {
         long ws = workspace(owner);
         long task = task(owner, project(owner, ws, "P"), "T", "LOW", null);
 
-        doThrow(new IllegalStateException("simulated history failure")).when(historySpy).record(any(Task.class), any(), anyString(), any(), any());
+        TaskHistoryService historyTarget = AopTestUtils.getUltimateTargetObject(historySpy);
+        doThrow(new IllegalStateException("simulated history failure")).when(historyTarget).record(any(Task.class), any(), anyString(), any(), any());
         send(patch("/api/v1/tasks/" + task + "/status"), owner, "{\"status\":\"IN_PROGRESS\"}", 500);
-        org.mockito.Mockito.reset(historySpy);
+        org.mockito.Mockito.reset(historyTarget);
 
         assertThat((String) JsonPath.read(send(get("/api/v1/tasks/" + task), owner, null, 200), "$.status")).isEqualTo("TODO");
     }
@@ -301,7 +304,33 @@ class ApiFlowIT {
         assertThat((String) JsonPath.read(dash, "$.projectProgress[0].createdBy.fullName")).isEqualTo("Owner");
 
         String members = send(get("/api/v1/workspaces/" + ws + "/members"), owner, null, 200);
-        assertThat((Integer) JsonPath.read(members, "$[?(@.fullName=='Dev')].openTasks[0]")).isEqualTo(1);
+        List<Map<String, Object>> memberRows = JsonPath.read(members, "$");
+        Map<String, Object> devRow = memberRows.stream().filter(row -> "Dev".equals(row.get("fullName"))).findFirst().orElseThrow();
+        assertThat(((Number) devRow.get("openTasks")).intValue()).isEqualTo(1);
+    }
+
+    @Test
+    void workspaceTasksAndMyWorkSortByDueDateWithNullsLast() throws Exception {
+        Person owner = Person.fresh("Owner");
+        long ws = workspace(owner);
+        long project = project(owner, ws, "P");
+        long ownerId = userId(owner);
+        send(post("/api/v1/projects/" + project + "/tasks"), owner,
+                "{\"title\":\"due later\",\"priority\":\"LOW\",\"assigneeId\":" + ownerId + ",\"dueDate\":\"2026-11-22\"}", 201);
+        send(post("/api/v1/projects/" + project + "/tasks"), owner,
+                "{\"title\":\"due earlier\",\"priority\":\"LOW\",\"assigneeId\":" + ownerId + ",\"dueDate\":\"2026-11-21\"}", 201);
+        task(owner, project, "no due date", "MEDIUM", ownerId);
+
+        String tasks = send(get("/api/v1/workspaces/" + ws + "/tasks?sort=dueDate,asc"), owner, null, 200);
+        assertThat((Integer) JsonPath.read(tasks, "$.totalElements")).isEqualTo(3);
+        assertThat((String) JsonPath.read(tasks, "$.content[0].title")).isEqualTo("due earlier");
+        assertThat((String) JsonPath.read(tasks, "$.content[1].title")).isEqualTo("due later");
+        Object lastDueDate = JsonPath.read(tasks, "$.content[-1].dueDate");
+        assertThat(lastDueDate).isNull();
+
+        String myWork = send(get("/api/v1/workspaces/" + ws + "/tasks?assigneeId=" + ownerId + "&open=true&size=6&sort=dueDate,asc"), owner, null, 200);
+        assertThat((Integer) JsonPath.read(myWork, "$.totalElements")).isEqualTo(3);
+        assertThat((String) JsonPath.read(myWork, "$.content[0].title")).isEqualTo("due earlier");
     }
 
     @Test

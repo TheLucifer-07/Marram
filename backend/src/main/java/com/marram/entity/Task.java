@@ -40,6 +40,9 @@ public class Task {
     @Column(name = "status_rank", insertable = false, updatable = false)
     private Integer statusRank;
 
+    @Column(name = "due_date_null_rank", insertable = false, updatable = false)
+    private Integer dueDateNullRank;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignee_id")
     private AppUser assignee;

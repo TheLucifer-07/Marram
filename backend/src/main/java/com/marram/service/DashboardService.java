@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,8 +72,7 @@ public class DashboardService {
         long total = byStatus.values().stream().mapToLong(Long::longValue).sum();
         long done = byStatus.get(TaskStatus.DONE);
 
-        List<Project> active = projects.findByWorkspaceIdAndStatus(workspaceId, ProjectStatus.ACTIVE,
-                PageRequest.of(0, 8, Sort.by(Sort.Order.asc("dueDate").nullsLast(), Sort.Order.desc("id"))));
+        List<Project> active = projects.findByWorkspaceIdAndStatus(workspaceId, ProjectStatus.ACTIVE, PageRequest.of(0, 8));
         Map<Long, TaskRepository.ProjectCount> counts = new java.util.HashMap<>();
         if (!active.isEmpty()) {
             tasks.countByProjects(active.stream().map(Project::getId).toList(), TaskStatus.DONE).forEach(c -> counts.put(c.getProjectId(), c));

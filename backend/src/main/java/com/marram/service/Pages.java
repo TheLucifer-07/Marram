@@ -24,8 +24,9 @@ public final class Pages {
             }
             boolean desc = parts.length > 1 && "desc".equalsIgnoreCase(parts[1].trim());
             Sort.Order o = desc ? Sort.Order.desc(property) : Sort.Order.asc(property);
-            if (property.equals("dueDate")) o = o.nullsLast();
-            order = Sort.by(o, Sort.Order.desc("id"));
+            order = property.equals("dueDate")
+                    ? Sort.by(Sort.Order.asc("dueDateNullRank"), o, Sort.Order.desc("id"))
+                    : Sort.by(o, Sort.Order.desc("id"));
         }
         return PageRequest.of(p, s, order);
     }

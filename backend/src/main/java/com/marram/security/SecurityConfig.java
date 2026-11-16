@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import javax.crypto.spec.SecretKeySpec;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -50,7 +51,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, JsonSecurityHandlers handlers, CorsConfigurationSource cors) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, JsonSecurityHandlers handlers,
+                                    @Qualifier("corsConfigurationSource") CorsConfigurationSource cors) throws Exception {
         http
             .cors(c -> c.configurationSource(cors))
             // Stateless bearer-token API: no cookies are used for auth, so there is no ambient credential for CSRF to abuse.

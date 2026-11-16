@@ -1,5 +1,26 @@
-node_modules
-dist
+
+# Environment files and secrets
 .env
-.env.local
+.env.*
+!.env.example
+
+**/.env
+**/.env.*
+!**/.env.example
+
+# Frontend
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Backend
+backend/target/
+
+# IDE and operating system
+.DS_Store
+.idea/
+.vscode/
+
+# Logs
 *.log
+npm-debug.log*

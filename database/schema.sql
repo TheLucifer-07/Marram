@@ -121,3 +121,8 @@ CREATE INDEX idx_tasks_deleted_at ON tasks (deleted_at);
 CREATE INDEX idx_history_task_created ON task_history (task_id, created_at);
 CREATE INDEX idx_history_created ON task_history (created_at);
 CREATE INDEX idx_comments_task_created ON comments (task_id, created_at);
+
+-- ===== V6__add_due_date_null_sort_rank.sql =====
+ALTER TABLE tasks
+    ADD COLUMN due_date_null_rank INT
+        GENERATED ALWAYS AS (CASE WHEN due_date IS NULL THEN 1 ELSE 0 END) STORED;
