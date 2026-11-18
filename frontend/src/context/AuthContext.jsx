@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { supabase, supabaseConfigured } from '../lib/supabase'
 import { Api, errorMessage } from '../lib/api'
+import { getAuthRedirectUrl } from '../lib/authRedirect'
 
 const AuthContext = createContext(null)
 
@@ -49,7 +50,7 @@ export function AuthProvider({ children }) {
   const signUp = useCallback(async ({ fullName, email, password }) => {
     const { data, error } = await supabase.auth.signUp({
       email, password,
-      options: { data: { full_name: fullName }, emailRedirectTo: `${window.location.origin}/auth/callback` },
+      options: { data: { full_name: fullName }, emailRedirectTo: getAuthRedirectUrl() },
     })
     if (error) throw error
     // Supabase hides duplicate emails by returning a user with no identities.
@@ -69,7 +70,7 @@ export function AuthProvider({ children }) {
   const signInWithGoogle = useCallback(async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: getAuthRedirectUrl() },
     })
     if (error) throw error
   }, [])

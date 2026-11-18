@@ -45,6 +45,8 @@ src/
 
 `AuthContext` wraps `supabase-js` (PKCE flow, session persisted by the SDK, auto-refresh). After a session exists it calls `GET /auth/me`, which is where the backend verifies the token and returns the application profile. `ProtectedRoute` handles: not configured, restoring session, signed out (redirect with return path), profile load failure (retry), ready. The Axios client attaches the current access token to every request and retries once on 401 after a refresh, then signs the user out.
 
+Google OAuth and email confirmation both return to `/auth/callback` on the origin currently serving the frontend. The Vercel rewrite keeps React Router callback routes available on production and preview deployments. Add each deployment origin's callback URL to Supabase Authentication → URL Configuration; keep the Supabase Site URL set to the canonical production origin.
+
 ## Theme system
 
 All colors are RGB triplets in CSS variables under `:root`/`[data-theme='light']` and `[data-theme='dark']` in `src/index.css`; Tailwind maps names such as `bg-surface` and `text-muted` to them. `ThemeContext` sets `data-theme` on `<html>` and stores the choice in `localStorage`; an inline script in `index.html` applies it before first paint to avoid a flash. Charts use the same variables.

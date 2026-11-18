@@ -15,18 +15,19 @@ Authentication → Sign In / Providers → Email: enabled. Turn **Confirm email*
 ## 3. Redirect URLs
 
 Authentication → URL Configuration:
-- **Site URL**: your production URL (for local work, `http://localhost:5173`).
+- **Site URL**: your canonical production origin (for example, `https://<your-production-domain>`). Do not leave this set to a localhost URL on a production project: Supabase can use the Site URL when a requested `redirectTo` is not in the Redirect URLs allow list.
 - **Redirect URLs** (allow list), add each:
   - `http://localhost:5173/auth/callback`
   - `http://localhost:3000/auth/callback` (Docker Compose)
-  - `https://YOUR-DOMAIN/auth/callback`
+  - `https://<your-production-domain>/auth/callback`
+  - `https://<your-preview-host-pattern>/auth/callback` for Vercel previews, using the exact wildcard pattern supported by the Supabase redirect URL allow list and matching only your Vercel project/team hosts. The frontend sends the current deployment origin, so preview redirects require the matching origin and callback path to be allowed.
 
 ## 4. Google OAuth
 
 1. Google Cloud Console → create or select a project.
 2. APIs & Services → OAuth consent screen: user type External; app name, support email; scopes `openid`, `email`, `profile`. While in Testing, add your Google accounts as test users.
 3. APIs & Services → Credentials → Create credentials → OAuth client ID → **Web application**.
-   - Authorized JavaScript origins: `http://localhost:5173`, `http://localhost:3000`, `https://YOUR-DOMAIN`.
+   - Authorized JavaScript origins: `http://localhost:5173`, `http://localhost:3000`, `https://<your-production-domain>` and any preview origins needed for browser-based auth.
    - Authorized redirect URI: `https://<ref>.supabase.co/auth/v1/callback` (this is Supabase's callback, not the app's).
 4. Copy the **Client ID** and **Client secret**.
 5. Supabase → Authentication → Sign In / Providers → Google: enable, paste both, save.
